@@ -6,7 +6,6 @@ import com.deepl.api.TranslatorOptions;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public final class DeepLTranslationService implements TranslationService {
@@ -23,24 +22,15 @@ public final class DeepLTranslationService implements TranslationService {
 
     @Override
     public List<String> translate(List<String> words, String languageCode) {
-        if (words.isEmpty()) {
-            return Collections.emptyList();
-        }
-
         var inputAsText = String.join(" ", words);
         try {
             var translationResult = translator.translateText(inputAsText, null, languageCode);
-            return Arrays.asList(sanitized(translationResult.getText()).split(" "));
+            return Arrays.asList(translationResult.getText().split(" "));
         } catch (DeepLException e) {
             throw new FunnotationException("Could not translate the words " + inputAsText, e);
         } catch (InterruptedException e) {
             throw new FunnotationException("Translating the words " + inputAsText + " timed out", e);
         }
-    }
-
-    // TODO: needs test
-    private String sanitized(String text) {
-        return text.replaceAll("\\p{Punct}", "");
     }
 
 }

@@ -12,7 +12,10 @@ public class DeepLApiKey {
     public static DeepLApiKey createFromSystemProperty() {
         var apiKeyValue = System.getenv(API_KEY_ENV_VAR);
         if (apiKeyValue == null || apiKeyValue.isBlank()) {
-            throw new FunnotationException("DeepL API key is not provided. Follow the instructions at https://github.com/DeepLcom/deepl-java?tab=readme-ov-file#getting-an-authentication-key to create one");
+            throw new FunnotationException(
+                "DeepL API key is not provided via the 'FUNNOTATION_DEEPL_API_KEY' environment variable. " +
+                "Follow the instructions at https://github.com/DeepLcom/deepl-java?tab=readme-ov-file#getting-an-authentication-key to create one"
+            );
         }
 
         return new DeepLApiKey(apiKeyValue);

@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.github.pshevche.funnotation.internal.Tokenizer.toCamelCaseString;
-import static io.github.pshevche.funnotation.internal.Tokenizer.toPascalCaseString;
-import static io.github.pshevche.funnotation.internal.Tokenizer.wordsFromPascalOrCamelCase;
+import static io.github.pshevche.funnotation.internal.TranslationUtils.toCamelCaseString;
+import static io.github.pshevche.funnotation.internal.TranslationUtils.toPascalCaseString;
+import static io.github.pshevche.funnotation.internal.TranslationUtils.wordsFromPascalOrCamelCase;
 import static java.util.stream.Collectors.toMap;
 
 /**

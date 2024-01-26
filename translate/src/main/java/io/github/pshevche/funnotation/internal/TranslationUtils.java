@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Tokenizer {
-    private Tokenizer() {
+public class TranslationUtils {
+    private TranslationUtils() {
     }
 
     public static List<String> wordsFromPascalOrCamelCase(String pascalOrCamelCaseString) {
@@ -40,7 +40,7 @@ public class Tokenizer {
         var result = new StringBuilder();
 
         for (var word : words) {
-            result.append(capitalized(word.toLowerCase()));
+            result.append(capitalized(sanitized(word.toLowerCase())));
         }
 
         return result.toString();
@@ -50,7 +50,7 @@ public class Tokenizer {
         var result = new StringBuilder();
 
         for (var i = 0; i < words.size(); ++i) {
-            var word = words.get(i).toLowerCase();
+            var word = sanitized(words.get(i).toLowerCase());
             if (i == 0) {
                 result.append(word);
             } else {
@@ -59,6 +59,10 @@ public class Tokenizer {
         }
 
         return result.toString();
+    }
+
+    public static String sanitized(String input) {
+        return input.replaceAll("[,.]", "");
     }
 
     private static String capitalized(String word) {
