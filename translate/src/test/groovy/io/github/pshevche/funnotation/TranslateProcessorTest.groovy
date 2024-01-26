@@ -1,29 +1,25 @@
 package io.github.pshevche.funnotation
 
 import com.deepl.api.LanguageCode
-import com.google.testing.compile.JavaFileObjects
 import io.github.pshevche.funnotation.internal.TranslationService
-import spock.lang.Specification
 
-import static com.google.testing.compile.CompilationSubject.assertThat
-import static com.google.testing.compile.Compiler.javac
-
-class TranslateProcessorTest extends Specification {
+class TranslateProcessorTest extends BaseProcessorTest<TranslateProcessor> {
 
     TranslationService translator = Mock {
         translate(_, _) >> { args -> args[0].collect { ["translated", it] }.flatten() }
     }
 
+    @Override
+    TranslateProcessor createProcessor() {
+        new TranslateProcessor(translator)
+    }
+
     def "translates simple class"() {
         given:
-        def compilation = javac()
-                .withProcessors(new TranslateProcessor(translator))
-                .compile(JavaFileObjects.forResource("io/github/pshevche/funnotation/input/SmokeTestClass.java"))
+        def compilation = compile(input("SmokeTestClass"))
 
         expect:
-        assertThat(compilation).succeededWithoutWarnings()
-        assertThat(compilation).generatedSourceFile("io.github.pshevche.funnotation.TranslatedSmokeTranslatedTestTranslatedClass")
-                .contentsAsUtf8String().isEqualTo("""\
+        assertGeneratedFileWithContent(compilation, "io.github.pshevche.funnotation.TranslatedSmokeTranslatedTestTranslatedClass", """\
 package io.github.pshevche.funnotation;
 
 public class TranslatedSmokeTranslatedTestTranslatedClass {
@@ -56,14 +52,10 @@ public class TranslatedSmokeTranslatedTestTranslatedClass {
 
     def "respects the language setting"() {
         when:
-        def compilation = javac()
-                .withProcessors(new TranslateProcessor(translator))
-                .compile(JavaFileObjects.forResource("io/github/pshevche/funnotation/input/SmokeTestClass.java"))
+        def compilation = compile(input("SmokeTestClass"))
 
         then:
         1 * translator.translate(["smoke", "test", "class"], LanguageCode.German) >> ["translated", "smoke", "test", "class"]
-
-        and:
-        assertThat(compilation).succeededWithoutWarnings()
     }
+
 }
