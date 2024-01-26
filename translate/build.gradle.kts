@@ -10,6 +10,7 @@ repositories {
 dependencies {
     annotationProcessor(libs.auto.service)
     implementation(libs.auto.service)
+    implementation(libs.deepl)
 
     testImplementation(libs.groovy)
     testImplementation(libs.spock.core)
@@ -26,6 +27,16 @@ java {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    compileTestingJvmArgs()
+}
+
+tasks.register<Test>("e2eTest") {
+    useJUnitPlatform()
+    systemProperty("funnotation.deepl.api.key", project.property("funnotation.deepl.api.key")!!)
+    compileTestingJvmArgs()
+}
+
+fun Test.compileTestingJvmArgs() {
     // https://github.com/google/compile-testing/issues/222
     jvmArgs(
         "--add-opens",

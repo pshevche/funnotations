@@ -7,6 +7,7 @@ junit = "4.13.2"
 spock-core = "2.2-groovy-3.0"
 auto-service = "1.1.1"
 compile-testing = "0.21.0"
+deepl = "1.4.0"
 
 [libraries]
 groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }
@@ -14,3 +15,4 @@ junit = { module = "junit:junit", version.ref = "junit" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock-core" }
 auto-service = { module = "com.google.auto.service:auto-service", version.ref = "auto-service" }
 compile-testing = { module = "com.google.testing.compile:compile-testing", version.ref = "compile-testing" }
+deepl = { module = "com.deepl.api:deepl-java", version.ref = "deepl" }

@@ -1,6 +1,7 @@
 package io.github.pshevche.funnotation
 
 import com.google.testing.compile.JavaFileObjects
+import io.github.pshevche.funnotation.internal.DeepLTranslator
 import spock.lang.Specification
 
 import static com.google.testing.compile.CompilationSubject.assertThat
@@ -8,47 +9,45 @@ import static com.google.testing.compile.Compiler.javac
 
 class TranslateProcessorTest extends Specification {
 
+    DeepLTranslator translator = words -> words.collect { ["translated", it] }.flatten()
+
     def "translates simple class"() {
         given:
         def compilation = javac()
-                .withProcessors(new TranslateProcessor())
+                .withProcessors(new TranslateProcessor(translator))
                 .compile(JavaFileObjects.forResource("io/github/pshevche/funnotation/input/SampleClass.java"))
 
         expect:
         assertThat(compilation).succeededWithoutWarnings()
-        assertThat(compilation).generatedSourceFile("io.github.pshevche.funnotation.TranslatedSampleClass")
-                .hasSourceEquivalentTo(JavaFileObjects.forResource("io/github/pshevche/funnotation/expected/SampleClass.java"))
-        assertThat(compilation).generatedSourceFile("io.github.pshevche.funnotation.TranslatedSampleClass")
+        assertThat(compilation).generatedSourceFile("io.github.pshevche.funnotation.TranslatedSampleTranslatedClass")
                 .contentsAsUtf8String().isEqualTo("""\
 package io.github.pshevche.funnotation;
 
-public class TranslatedSampleClass {
+public class TranslatedSampleTranslatedClass {
 
     private final SampleClass delegate;
 
-    public TranslatedSampleClass(SampleClass delegate) {
+    public TranslatedSampleTranslatedClass(SampleClass delegate) {
         this.delegate = delegate;
     }
 
-    public void hello() {
+    public void translatedHello() {
         this.delegate.hello();
     }
 
-    void privilegedHello() {
+    void translatedPrivilegedTranslatedHello() {
         this.delegate.privilegedHello();
     }
 
-    public void bye() {
+    public void translatedBye() {
         this.delegate.bye();
     }
 
-    void privilegedBye() {
+    void translatedPrivilegedTranslatedBye() {
         this.delegate.privilegedBye();
     }
 
 }
 """)
     }
-
-    // TODO pshevche: interface, enum, class only with util methods, inheritance
 }
