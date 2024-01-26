@@ -81,6 +81,7 @@ public class TranslateProcessor extends AbstractProcessor {
     private void createDelegateClass(TypeElement delegateClass, List<ExecutableElement> methodsToTranslate, Language language) {
         var packageName = processingEnv.getElementUtils().getPackageOf(delegateClass).getQualifiedName().toString();
         var delegateClassName = delegateClass.getSimpleName();
+        var classModifier = determineClassModifier(delegateClass);
         var newClassName = translateClassName(delegateClassName, language);
         var newClassFQN = packageName + "." + newClassName;
         var filer = processingEnv.getFiler();
@@ -88,29 +89,62 @@ public class TranslateProcessor extends AbstractProcessor {
         try {
             var fileObject = filer.createSourceFile(newClassFQN, delegateClass);
             try (var writer = new PrintWriter(fileObject.openWriter())) {
-                writer.println("""
-                    package %s;
-                                        
-                    public class %s {
-                        
-                        private final %s delegate;
-                        
-                        public %s(%s delegate) {
-                            this.delegate = delegate;
-                        }
-                        
-                    %s
-                    }""".formatted(packageName,
-                    newClassName,
-                    delegateClassName,
-                    newClassName,
-                    delegateClassName,
-                    delegateMethodContent(methodsToTranslate, language)));
+                var displayedClassModifier = classModifier.isBlank() ? "" : classModifier + " ";
+
+                if (methodsToTranslate.isEmpty()) {
+                    writer.println("""
+                        package %s;
+                                            
+                        %sclass %s {
+                            
+                            private final %s delegate;
+                            
+                            %s%s(%s delegate) {
+                                this.delegate = delegate;
+                            }
+                        }""".formatted(packageName,
+                        displayedClassModifier,
+                        newClassName,
+                        delegateClassName,
+                        displayedClassModifier,
+                        newClassName,
+                        delegateClassName
+                    ));
+                } else {
+                    writer.println("""
+                        package %s;
+                                            
+                        %sclass %s {
+                            
+                            private final %s delegate;
+                            
+                            %s%s(%s delegate) {
+                                this.delegate = delegate;
+                            }
+                            
+                        %s
+                        }""".formatted(packageName,
+                        displayedClassModifier,
+                        newClassName,
+                        delegateClassName,
+                        displayedClassModifier,
+                        newClassName,
+                        delegateClassName,
+                        delegateMethodContent(methodsToTranslate, language))
+                    );
+                }
             }
         } catch (IOException e) {
             throw new FunnotationException("Could not process the @Translate annotation on class " + delegateClass.getSimpleName(), e);
         }
 
+    }
+
+    private String determineClassModifier(TypeElement delegateClass) {
+        return delegateClass.getModifiers().contains(Modifier.PUBLIC)
+            ? "public"
+            : delegateClass.getModifiers().contains(Modifier.PROTECTED) ? "protected"
+            : "";
     }
 
     private String translateClassName(Name className, Language language) {
