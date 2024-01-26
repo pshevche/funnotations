@@ -36,7 +36,7 @@ tasks.named<Test>("test") {
 
 tasks.register<Test>("e2eTest") {
     useJUnitPlatform()
-    systemProperty("funnotation.deepl.api.key", project.property("funnotation.deepl.api.key")!!)
+    environment("FUNNOTATION_DEEPL_API_KEY", project.property("funnotation.deepl.api.key")!!)
     compileTestingJvmArgs()
 
     filter {

@@ -1,11 +1,13 @@
 package io.github.pshevche.funnotation;
 
+import com.google.auto.service.AutoService;
 import io.github.pshevche.funnotation.internal.DeepLApiKey;
-import io.github.pshevche.funnotation.internal.TranslationService;
 import io.github.pshevche.funnotation.internal.DeepLTranslationService;
 import io.github.pshevche.funnotation.internal.FunnotationException;
+import io.github.pshevche.funnotation.internal.TranslationService;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -29,9 +31,16 @@ import static io.github.pshevche.funnotation.internal.Tokenizer.toPascalCaseStri
 import static io.github.pshevche.funnotation.internal.Tokenizer.wordsFromPascalOrCamelCase;
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * Processes {@link Translate} annotation by creating a delegating class where names of all methods and parameters are
+ * replaced with their translated version.
+ * <p>
+ * Uses <a href="https://github.com/DeepLcom/deepl-java}">DeepL Java library</a> for performing the actual translation.
+ */
 @SupportedAnnotationTypes("io.github.pshevche.funnotation.Translate")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
-class TranslateProcessor extends AbstractProcessor {
+@AutoService(Processor.class)
+public class TranslateProcessor extends AbstractProcessor {
 
     private final TranslationService translator;
 

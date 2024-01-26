@@ -33,6 +33,9 @@ import static com.deepl.api.LanguageCode.Spanish;
 import static com.deepl.api.LanguageCode.Swedish;
 import static com.deepl.api.LanguageCode.Turkish;
 
+/**
+ * Annotation-compatible version of {@link com.deepl.api.LanguageCode}.
+ */
 public enum Language {
     BULGARIAN(Bulgarian),
     CZECH(Czech),

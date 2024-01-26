@@ -4,3 +4,4 @@ plugins {
 
 rootProject.name = "funnotations"
 include("translate")
+include("examples")

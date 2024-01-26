@@ -1,0 +1,14 @@
+= Funnotations
+
+This repository contains some examples of the creative application of Java annotation processing.
+This repository has purely educational and motivational purposes.
+
+== `@Translate`
+
+When applied to a class, a new class will be created where names of all visible methods will be translated into a language of choice.
+The created delegate will simply invoke all methods of the original class.
+
+* *Prerequisites*: link:translate/src/main/java/io/github/pshevche/funnotation/TranslateProcessor.java[TranslateProcessor] relies on the link:https://github.com/DeepLcom/deepl-java[DeepL Java library] when performing translations.
+This requires a valid link:https://github.com/DeepLcom/deepl-java?tab=readme-ov-file#getting-an-authentication-key[DeepL API key] to be created and set via the `FUNNOTATION_DEEPL_API_KEY` environment variable.
+* link:translate/src/main/java/io/github/pshevche/funnotation/Translate.java[Implementation]
+* link:examples/src/main/java/io/github/pshevche/funnotations/examples/translate/Spaceship.java[Example]
