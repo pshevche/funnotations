@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  * </ul>
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.CLASS)
+@Retention(RetentionPolicy.SOURCE)
 public @interface Translate {
 
     Language[] value();
