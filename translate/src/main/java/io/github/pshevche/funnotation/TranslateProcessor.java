@@ -55,9 +55,9 @@ public class TranslateProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (var element : roundEnv.getElementsAnnotatedWith(Translate.class)) {
-            var language = element.getAnnotation(Translate.class).value();
+            var languages = element.getAnnotation(Translate.class).value();
             switch (element.getKind()) {
-                case CLASS -> translateClass((TypeElement) element, language);
+                case CLASS -> translateClass((TypeElement) element, languages);
                 default -> throw new FunnotationException("@Translate annotation can only be applied to a class");
             }
         }
@@ -65,9 +65,11 @@ public class TranslateProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void translateClass(TypeElement element, Language language) {
-        var methodsToTranslate = extractAccessibleMethods(element);
-        createDelegateClass(element, methodsToTranslate, language);
+    private void translateClass(TypeElement element, Language[] languages) {
+        for (var language : languages) {
+            var methodsToTranslate = extractAccessibleMethods(element);
+            createDelegateClass(element, methodsToTranslate, language);
+        }
     }
 
     private static List<ExecutableElement> extractAccessibleMethods(Element element) {
@@ -176,12 +178,13 @@ public class TranslateProcessor extends AbstractProcessor {
 
         return """
                 %s%s %s(%s) {
-                    this.delegate.%s(%s);
+                    %sthis.delegate.%s(%s);
                 }
             """.formatted(modifiers.isBlank() ? "" : modifiers + " ",
             method.getReturnType(),
             newMethodName,
             parameters(method, parameterNamesTranslations),
+            method.getReturnType().toString().equals("VOID") ? "" : "return ",
             method.getSimpleName(),
             parameterNames(method, parameterNamesTranslations));
     }

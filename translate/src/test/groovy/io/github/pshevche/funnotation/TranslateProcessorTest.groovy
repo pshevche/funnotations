@@ -1,7 +1,10 @@
 package io.github.pshevche.funnotation
 
 import com.deepl.api.LanguageCode
+import com.google.testing.compile.JavaFileObjects
 import io.github.pshevche.funnotation.internal.TranslationService
+
+import static com.google.testing.compile.Compiler.javac
 
 // TODO: handle custom params
 // TODO: support various types (enums, interfaces, abstract classes etc)
@@ -126,6 +129,89 @@ class TranslatedMethodsTranslatedWithTranslatedParams {
 
     public void translatedMethod2(java.lang.String translatedParam2) {
         this.delegate.method2(translatedParam2);
+    }
+
+}
+""")
+    }
+
+    def "translates into multiple languages if requested"() {
+        given:
+        TranslationService translator = Mock {
+            translate(_, _) >> { args -> args[0].collect { [args[1], it] }.flatten() }
+        }
+
+        when:
+        def compilation = javac()
+                .withProcessors(new TranslateProcessor(translator))
+                .compile(input("MultipleLanguages"))
+
+        then:
+        assertGeneratedFileWithContent(compilation, "io.github.pshevche.funnotation.CsMultipleCsLanguages", """\
+package io.github.pshevche.funnotation;
+
+public class CsMultipleCsLanguages {
+
+    private final MultipleLanguages delegate;
+
+    public CsMultipleCsLanguages(MultipleLanguages delegate) {
+        this.delegate = delegate;
+    }
+}
+""")
+
+        and:
+        assertGeneratedFileWithContent(compilation, "io.github.pshevche.funnotation.DeMultipleDeLanguages", """\
+package io.github.pshevche.funnotation;
+
+public class DeMultipleDeLanguages {
+
+    private final MultipleLanguages delegate;
+
+    public DeMultipleDeLanguages(MultipleLanguages delegate) {
+        this.delegate = delegate;
+    }
+}
+""")
+    }
+
+    def "handles custom parameter types"() {
+        when:
+        def compilation = javac()
+                .withProcessors(createProcessor())
+                .compile(
+                        JavaFileObjects.forSourceString("io.github.pshevche.funnotation.internal.Param", """\
+package io.github.pshevche.funnotation.internal;
+
+public class Param {}
+"""),
+                        JavaFileObjects.forSourceString("io.github.pshevche.funnotation.RootClass", """\
+package io.github.pshevche.funnotation;
+
+import io.github.pshevche.funnotation.internal.Param;
+
+@Translate(Language.GERMAN)
+public class RootClass {
+    public Param method(Param param) {
+        return new Param();
+    }
+}
+"""))
+
+        then:
+        assertGeneratedFileWithContent(compilation, "io.github.pshevche.funnotation.TranslatedRootTranslatedClass", """\
+package io.github.pshevche.funnotation;
+
+public class TranslatedRootTranslatedClass {
+
+    private final RootClass delegate;
+
+    public TranslatedRootTranslatedClass(RootClass delegate) {
+        this.delegate = delegate;
+    }
+
+    public io.github.pshevche.funnotation.internal.Param translatedMethod(io.github.pshevche.funnotation.internal.Param translatedParam) {
+        return this.delegate.method(translatedParam);
     }
 
 }
