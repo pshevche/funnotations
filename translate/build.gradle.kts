@@ -26,4 +26,13 @@ java {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+    // https://github.com/google/compile-testing/issues/222
+    jvmArgs(
+        "--add-opens",
+        "jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
+        "--add-opens",
+        "jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
+        "--add-opens",
+        "jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED"
+    )
 }
