@@ -184,9 +184,13 @@ public class TranslateProcessor extends AbstractProcessor {
             method.getReturnType(),
             newMethodName,
             parameters(method, parameterNamesTranslations),
-            method.getReturnType().toString().equals("VOID") ? "" : "return ",
+            hasReturnValue(method) ? "return " : "",
             method.getSimpleName(),
             parameterNames(method, parameterNamesTranslations));
+    }
+
+    private boolean hasReturnValue(ExecutableElement method) {
+        return !method.getReturnType().toString().equals("void");
     }
 
     private String modifiers(ExecutableElement method) {
