@@ -31,12 +31,17 @@ public final class DefaultDeepLTranslator implements DeepLTranslator {
         var inputAsText = String.join(" ", words);
         try {
             var translationResult = translator.translateText(inputAsText, null, LanguageCode.German);
-            return Arrays.asList(translationResult.getText().split(" "));
+            return Arrays.asList(sanitized(translationResult.getText()).split(" "));
         } catch (DeepLException e) {
             throw new FunnotationException("Could not translate the words " + inputAsText, e);
         } catch (InterruptedException e) {
             throw new FunnotationException("Translating the words " + inputAsText + " timed out", e);
         }
+    }
+
+    // TODO: needs test
+    private String sanitized(String text) {
+        return text.replaceAll("\\p{Punct}", "");
     }
 
 }
