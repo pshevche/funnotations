@@ -10,13 +10,13 @@ class TranslateProcessorE2ETest extends Specification {
 
     def "translates a car class into German"() {
         given:
-        def expected = JavaFileObjects.forResource("io/github/pshevche/funnotation/expected/Car.java")
+        def expected = JavaFileObjects.forResource("io/github/pshevche/funnotation/expected/GermanCar.java")
         def compilation = javac()
                 .withProcessors(new TranslateProcessor())
-                .compile(JavaFileObjects.forResource("io/github/pshevche/funnotation/input/Car.java"))
+                .compile(JavaFileObjects.forResource("io/github/pshevche/funnotation/input/GermanCar.java"))
 
         expect:
-        assertThat(compilation).generatedSourceFile("io.github.pshevche.funnotation.Auto")
+        assertThat(compilation).generatedSourceFile("io.github.pshevche.funnotation.DeutschesAuto")
                 .contentsAsUtf8String().isEqualTo(expected.getCharContent(true))
     }
 }

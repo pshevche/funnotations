@@ -1,10 +1,10 @@
 package io.github.pshevche.funnotation;
 
-public class Auto {
+public class DeutschesAuto {
 
-    private final Car delegate;
+    private final GermanCar delegate;
 
-    public Auto(Car delegate) {
+    public DeutschesAuto(GermanCar delegate) {
         this.delegate = delegate;
     }
 

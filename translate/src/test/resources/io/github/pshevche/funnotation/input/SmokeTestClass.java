@@ -1,9 +1,9 @@
 package io.github.pshevche.funnotation;
 
-@Translate
-public class SampleClass {
+@Translate(Language.GERMAN)
+public class SmokeTestClass {
 
-    public SampleClass() {
+    public SmokeTestClass() {
     }
 
     public void hello() {

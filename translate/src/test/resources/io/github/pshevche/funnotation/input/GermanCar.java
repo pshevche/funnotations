@@ -1,7 +1,7 @@
 package io.github.pshevche.funnotation;
 
-@Translate
-public class Car {
+@Translate(Language.GERMAN)
+public class GermanCar {
 
     public void ride() {
     }

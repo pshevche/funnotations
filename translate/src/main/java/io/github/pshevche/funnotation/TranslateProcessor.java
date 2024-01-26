@@ -1,8 +1,8 @@
 package io.github.pshevche.funnotation;
 
 import io.github.pshevche.funnotation.internal.DeepLApiKey;
-import io.github.pshevche.funnotation.internal.DeepLTranslator;
-import io.github.pshevche.funnotation.internal.DefaultDeepLTranslator;
+import io.github.pshevche.funnotation.internal.TranslationService;
+import io.github.pshevche.funnotation.internal.DeepLTranslationService;
 import io.github.pshevche.funnotation.internal.FunnotationException;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -33,34 +33,32 @@ import static java.util.stream.Collectors.toMap;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 class TranslateProcessor extends AbstractProcessor {
 
-    private final DeepLTranslator translator;
+    private final TranslationService translator;
 
     public TranslateProcessor() {
-        this(new DefaultDeepLTranslator(DeepLApiKey.createFromSystemProperty()));
+        this(new DeepLTranslationService(DeepLApiKey.createFromSystemProperty()));
     }
 
-    TranslateProcessor(DeepLTranslator translator) {
+    TranslateProcessor(TranslationService translator) {
         this.translator = translator;
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (var annotation : annotations) {
-            var annotatedElements = roundEnv.getElementsAnnotatedWith(annotation);
-            for (var element : annotatedElements) {
-                switch (element.getKind()) {
-                    case CLASS -> translateClass((TypeElement) element);
-                    default -> throw new FunnotationException("@Translate annotation can only be applied to a class");
-                }
+        for (var element : roundEnv.getElementsAnnotatedWith(Translate.class)) {
+            var language = element.getAnnotation(Translate.class).value();
+            switch (element.getKind()) {
+                case CLASS -> translateClass((TypeElement) element, language);
+                default -> throw new FunnotationException("@Translate annotation can only be applied to a class");
             }
         }
 
         return true;
     }
 
-    private void translateClass(TypeElement element) {
+    private void translateClass(TypeElement element, Language language) {
         var methodsToTranslate = extractAccessibleMethods(element);
-        createDelegateClass(element, methodsToTranslate);
+        createDelegateClass(element, methodsToTranslate, language);
     }
 
     private static List<ExecutableElement> extractAccessibleMethods(Element element) {
@@ -71,10 +69,10 @@ class TranslateProcessor extends AbstractProcessor {
             .toList();
     }
 
-    private void createDelegateClass(TypeElement delegateClass, List<ExecutableElement> methodsToTranslate) {
+    private void createDelegateClass(TypeElement delegateClass, List<ExecutableElement> methodsToTranslate, Language language) {
         var packageName = processingEnv.getElementUtils().getPackageOf(delegateClass).getQualifiedName().toString();
         var delegateClassName = delegateClass.getSimpleName();
-        var newClassName = translateClassName(delegateClassName);
+        var newClassName = translateClassName(delegateClassName, language);
         var newClassFQN = packageName + "." + newClassName;
         var filer = processingEnv.getFiler();
 
@@ -98,7 +96,7 @@ class TranslateProcessor extends AbstractProcessor {
                     delegateClassName,
                     newClassName,
                     delegateClassName,
-                    delegateMethodContent(methodsToTranslate)));
+                    delegateMethodContent(methodsToTranslate, language)));
             }
         } catch (IOException e) {
             throw new FunnotationException("Could not process the @Translate annotation on class " + delegateClass.getSimpleName(), e);
@@ -106,31 +104,31 @@ class TranslateProcessor extends AbstractProcessor {
 
     }
 
-    private String translateClassName(Name className) {
+    private String translateClassName(Name className, Language language) {
         var words = wordsFromPascalOrCamelCase(className.toString());
-        var translatedWords = translator.translate(words);
+        var translatedWords = translator.translate(words, language.getCode());
         return toPascalCaseString(translatedWords);
     }
 
-    private String translateMethodOrParameterName(Name methodName) {
+    private String translateMethodOrParameterName(Name methodName, Language language) {
         var words = wordsFromPascalOrCamelCase(methodName.toString());
-        var translatedWords = translator.translate(words);
+        var translatedWords = translator.translate(words, language.getCode());
         return toCamelCaseString(translatedWords);
     }
 
-    private String delegateMethodContent(List<ExecutableElement> methodsToTranslate) {
+    private String delegateMethodContent(List<ExecutableElement> methodsToTranslate, Language language) {
         return methodsToTranslate.stream()
-            .map(this::delegateMethodContent)
+            .map(it -> delegateMethodContent(it, language))
             .collect(Collectors.joining("\n"));
     }
 
-    private String delegateMethodContent(ExecutableElement method) {
+    private String delegateMethodContent(ExecutableElement method, Language language) {
         var modifiers = modifiers(method);
-        var newMethodName = translateMethodOrParameterName(method.getSimpleName());
+        var newMethodName = translateMethodOrParameterName(method.getSimpleName(), language);
         var parameterNamesTranslations = method.getParameters().stream()
             .collect(toMap(
                 VariableElement::getSimpleName,
-                p -> translateMethodOrParameterName(p.getSimpleName())
+                p -> translateMethodOrParameterName(p.getSimpleName(), language)
             ));
 
         return """

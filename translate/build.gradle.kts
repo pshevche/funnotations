@@ -28,12 +28,20 @@ java {
 tasks.named<Test>("test") {
     useJUnitPlatform()
     compileTestingJvmArgs()
+
+    filter {
+        excludeTestsMatching("*.TranslateProcessorE2ETest")
+    }
 }
 
 tasks.register<Test>("e2eTest") {
     useJUnitPlatform()
     systemProperty("funnotation.deepl.api.key", project.property("funnotation.deepl.api.key")!!)
     compileTestingJvmArgs()
+
+    filter {
+        includeTestsMatching("*.TranslateProcessorE2ETest")
+    }
 }
 
 fun Test.compileTestingJvmArgs() {
