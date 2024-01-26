@@ -1,0 +1,12 @@
+== `@Translate`
+
+This "funnotation" creates
+
+=== TODO
+
+* sanitize output
+* support specifying a language to translate into
+* documentation + example
+* handle strange characters (?)
+* more tests for supported class structures
+* integ test w/ wiremock or something
