@@ -3,7 +3,7 @@ package io.github.pshevche.funnotations.examples.translate;
 import io.github.pshevche.funnotation.Language;
 import io.github.pshevche.funnotation.Translate;
 
-@Translate({Language.POLISH})
+@Translate({Language.POLISH, Language.SPANISH, Language.JAPANESE})
 public class Spaceship {
 
     private final String name;
